@@ -102,6 +102,9 @@ lon_vec = zeros(size(UTC,1),1)+lon;
 alt_vec = zeros(size(UTC,1),1)+altitude;
 [sAz,sEl] = SolarAzEl(UTC, lat_vec, lon_vec, alt_vec);
 
+% Subsurface incidence angle
+theta2 = asin(n1*sind(90-sEl)./n2);
+
 % Plot
 figure(3)
 clf
@@ -119,4 +122,20 @@ legend('Elevation', 'Azimuth')
 date_string = string(datetime(start_date, 'Format', 'yyyy MMM d')) + ...
     ' - ' + string(datetime(end_date, 'Format', 'yyyy MMM d'));
 title(['Sun Angles', 'Helheim Firn Aquifer', date_string])
+grid on
+
+%%
+figure(4)
+clf
+hold on;
+plot(plt_date_vec, rad2deg(theta2), 'b');
+plot(plt_date_vec(1:24:end), rad2deg(theta2(1:24:end)), 'b*');
+xticks(0:floor(days(end_date-start_date)))
+xticklabels(string(datetime(plt_date_labels,'Format', 'MMM d')))
+% xlim([0,24])
+xlabel('Dates')
+ylabel('Degrees')
+date_string = string(datetime(start_date, 'Format', 'yyyy MMM d')) + ...
+    ' - ' + string(datetime(end_date, 'Format', 'yyyy MMM d'));
+title(['Subsurface Angle of Incidence', 'Helheim Firn Aquifer', date_string])
 grid on
