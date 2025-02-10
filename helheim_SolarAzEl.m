@@ -2,8 +2,8 @@
 
 %% Single Day
 % Define time range and interval
-start_date = datetime([2025,03,01,0,0,0],'Format','yyyy/MM/dd HH:mm:SS');
-end_date = datetime([2025,03,01,23,59,0],'Format','yyyy/MM/dd HH:mm:SS');
+start_date = datetime([2025,06,21,0,0,0],'Format','yyyy/MM/dd HH:mm:SS');
+end_date = datetime([2025,06,21,23,59,0],'Format','yyyy/MM/dd HH:mm:SS');
 time_interval = minutes(0:minutes(end_date-start_date));
 
 % Define receiver position (lat, lon)
@@ -20,6 +20,12 @@ lat_vec = zeros(size(UTC,1),1)+lat;
 lon_vec = zeros(size(UTC,1),1)+lon;
 alt_vec = zeros(size(UTC,1),1)+altitude;
 [sAz,sEl] = SolarAzEl(UTC, lat_vec, lon_vec, alt_vec);
+belowHorizonkk = find(sEl<=0);
+sEl(belowHorizonkk) = NaN;
+sAz(belowHorizonkk) = NaN;
+
+[maxEl, maxElkk] = max(sEl)
+maxDateTime = UTC(maxElkk)
 
 %Plot
 figure(1)
@@ -27,6 +33,8 @@ clf
 hold on;
 plot(hours(time_interval), sEl, 'b', 'LineWidth',2);
 plot(hours(time_interval), sAz, 'r', 'LineWidth',2);
+plot(hours(time_interval(maxElkk)), sEl(maxElkk), 'bx', 'LineWidth',4);
+plot(hours(time_interval(maxElkk)), sAz(maxElkk), 'rx', 'LineWidth',4);
 xticks(0:4:24)
 xlim([0,24])
 xlabel('Military Time Hours')
@@ -47,6 +55,17 @@ lat = 66.3575; % [66.353, 66.362] Bounding Coordinates
 lon = -39.2235; % [-39.135, -39.312] Bounding Coordinates
 altitude = 0;
 
+%% Verification using Store Glacier Greenland
+% Define time range and interval
+start_date = datetime([2018,06,01,0,0,0],'Format','yyyy/MM/dd HH:mm:SS');
+end_date = datetime([2018,06,31,23,59,0],'Format','yyyy/MM/dd HH:mm:SS');
+time_interval = minutes(0:minutes(end_date-start_date));
+
+% Define receiver position (lat, lon)
+lat = 70.56; % [66.353, 66.362] Bounding Coordinates
+lon = -50.05; % [-39.135, -39.312] Bounding Coordinates
+altitude = 0;
+
 % Convert datenum to UTC
 mDateVec = start_date + time_interval;
 UTC = string(mDateVec');
@@ -56,6 +75,10 @@ lat_vec = zeros(size(UTC,1),1)+lat;
 lon_vec = zeros(size(UTC,1),1)+lon;
 alt_vec = zeros(size(UTC,1),1)+altitude;
 [sAz,sEl] = SolarAzEl(UTC, lat_vec, lon_vec, alt_vec);
+
+belowHorizonkk = find(sEl<0);
+sEl(belowHorizonkk) = NaN;
+sAz(belowHorizonkk) = NaN;
 
 % Plot
 figure(2)
@@ -102,6 +125,9 @@ lon_vec = zeros(size(UTC,1),1)+lon;
 alt_vec = zeros(size(UTC,1),1)+altitude;
 [sAz,sEl] = SolarAzEl(UTC, lat_vec, lon_vec, alt_vec);
 
+belowHorizonkk = find(sEl<0);
+sEl(belowHorizonkk) = NaN;
+sAz(belowHorizonkk) = NaN;
 % Subsurface incidence angle
 theta2 = asin(n1*sind(90-sEl)./n2);
 
@@ -118,7 +144,7 @@ xticklabels(string(datetime(plt_date_labels,'Format', 'MMM d')))
 % xlim([0,24])
 xlabel('Dates')
 ylabel('Degrees')
-legend('Elevation', 'Azimuth')
+legend('Elevation', 'Start of Day', 'Azimuth', 'Start of Day')
 date_string = string(datetime(start_date, 'Format', 'yyyy MMM d')) + ...
     ' - ' + string(datetime(end_date, 'Format', 'yyyy MMM d'));
 title(['Sun Angles', 'Helheim Firn Aquifer', date_string])
@@ -139,3 +165,28 @@ date_string = string(datetime(start_date, 'Format', 'yyyy MMM d')) + ...
     ' - ' + string(datetime(end_date, 'Format', 'yyyy MMM d'));
 title(['Subsurface Angle of Incidence', 'Helheim Firn Aquifer', date_string])
 grid on
+
+%% Max Elevation Angle
+
+% Define search range and interval
+start_date = datetime([2025,06,01,0,0,0],'Format','yyyy/MM/dd HH:mm:SS');
+end_date = datetime([2025,07,15,23,0,0],'Format','yyyy/MM/dd HH:mm:SS');
+time_interval = hours(0:hours(end_date-start_date));
+
+% Define receiver position (lat, lon)
+lat = 66.3575; % [66.353, 66.362] Bounding Coordinates
+lon = -39.2235; % [-39.135, -39.312] Bounding Coordinates
+altitude = 0;
+
+% Convert datenum to UTC
+mDateVec = start_date + time_interval;
+UTC = string(mDateVec');
+
+% Calculate AzEl
+lat_vec = zeros(size(UTC,1),1)+lat;
+lon_vec = zeros(size(UTC,1),1)+lon;
+alt_vec = zeros(size(UTC,1),1)+altitude;
+[sAz,sEl] = SolarAzEl(UTC, lat_vec, lon_vec, alt_vec);
+
+[maxEl, maxElkk] = max(sEl)
+maxDateTime = UTC(maxElkk)
